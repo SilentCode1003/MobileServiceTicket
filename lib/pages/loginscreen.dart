@@ -63,18 +63,18 @@ class _LoginScreen extends State<LoginScreen> {
                     //     controller: chewieController!,
                     //   ),
                     // ), 
-                    // Image.asset(
-                    //   'images/toge.png',
-                    //   height: 270,
-                    //   width: 270,
+                    Image.asset(
+                      'images/logo.png',
+                      height: 370,
+                      width: 370,
+                    ),
+                    // const Icon(
+                    //   Icons.data_thresholding,
+                    //   size: 200,
                     // ),
-                    const Icon(
-                      Icons.data_thresholding,
-                      size: 200,
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
+                    // const SizedBox(
+                    //   height: 5,
+                    // ),
                     TextFormField(
                       keyboardType: TextInputType.emailAddress,
                       controller: emailController,
