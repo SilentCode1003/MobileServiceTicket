@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class NavItem1 extends StatefulWidget {
   const NavItem1({super.key});
 
   @override
-  NavItem1State createState() => NavItem1State();
+  _AssignTicketListState createState() => _AssignTicketListState();
 }
 
-class NavItem1State extends State<NavItem1> {
+class _AssignTicketListState extends State<NavItem1> {
   final List<String> _cards = ['Card 1'];
 
   final List<String> _dropdownItems = ['Done', 'Pending', 'Cancelled'];
@@ -27,17 +29,50 @@ class NavItem1State extends State<NavItem1> {
     });
   }
 
+  List<dynamic> objects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAssignTickets();
+  }
+
+  Future<void> fetchAssignTickets() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://192.168.20.161:3020/assignticket/load'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          objects = responseData['data'] as List<dynamic>;
+
+          print('Subject: $objects');
+        });
+      } else {
+        throw Exception('Failed to load assigned tickets');
+      }
+    } catch (e) {
+      print('Error loading assigned tickets: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 59, 116, 61),
-        title: const Text('Tickets'),
-        centerTitle: true,
+        title: const Text('Assigned Tickets'),
       ),
       body: ListView.builder(
-        itemCount: _cards.length,
+        itemCount: objects.length,
         itemBuilder: (BuildContext context, int index) {
+          final ticket = objects[index];
+          String statusdetail = ticket['statusdetail'];
+          String ticketid = ticket['ticketid'];
+          String requestername = ticket['requestername'];
+          String datecreated = ticket['datecreated'];
+          String assignedto = ticket['assignedto'];
+          
           return Padding(
             padding: const EdgeInsets.all(15.0),
             child: Card(
@@ -47,21 +82,21 @@ class NavItem1State extends State<NavItem1> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Text(
-                      'INC-0000001 * Due Date',
+                    Text(
+                      '$ticketid $statusdetail',
                       textAlign: TextAlign.left,
                       style: TextStyle(fontSize: 10),
                     ),
                     // const SizedBox(height: 20),
-                    const Text(
-                      'ST 00001 - Macaria Drive',
+                    Text(
+                      '$requestername',
                       textAlign: TextAlign.left,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
 
-                    const Text(
-                      'Created at March 10, 2023 10:10 AM',
+                    Text(
+                      '$datecreated',
                       textAlign: TextAlign.left,
                       style: TextStyle(fontSize: 12),
                     ),
@@ -75,7 +110,7 @@ class NavItem1State extends State<NavItem1> {
                       padding: const EdgeInsets.only(top: 15.0),
                       child: Table(
                         children: [
-                          const TableRow(
+                          TableRow(
                             children: [
                               TableCell(
                                 child: Align(
@@ -93,7 +128,7 @@ class NavItem1State extends State<NavItem1> {
                                 child: Align(
                                   alignment: Alignment.topLeft,
                                   child: Text(
-                                    'Agent name',
+                                    'Agent Name',
                                     style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -103,14 +138,14 @@ class NavItem1State extends State<NavItem1> {
                               ),
                             ],
                           ),
-                          const TableRow(
+                           TableRow(
                             children: [
                               TableCell(
                                 child: Padding(
                                   padding: EdgeInsets.all(8.0),
                                   child: Align(
                                     alignment: Alignment.topLeft,
-                                    child: Text('Store Account 1'),
+                                    child: Text('$requestername'),
                                   ),
                                 ),
                               ),
@@ -119,7 +154,7 @@ class NavItem1State extends State<NavItem1> {
                                   padding: EdgeInsets.all(8.0),
                                   child: Align(
                                     alignment: Alignment.topLeft,
-                                    child: Text('John Ernest Japitana'),
+                                    child: Text('$assignedto'),
                                   ),
                                 ),
                               ),
@@ -204,6 +239,4 @@ class NavItem1State extends State<NavItem1> {
       ),
     );
   }
-
-  static where(Function(dynamic item) param0) {}
 }
