@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ticket/Repository/customhelper.dart';
 
 class Item {
   Item(
@@ -27,15 +26,7 @@ class Payslip extends StatefulWidget {
 }
 
 class _PayslipState extends State<Payslip> {
-  final List<Item> _data = List<Item>.generate(2, (int index) {
-    return Item(
-        headerText: getMonths(),
-        sss: '100',
-        pagibig: '100',
-        philhealth: '100',
-        deduction: '100',
-        index: index);
-  });
+  
 
   @override
   Widget build(BuildContext context) {

@@ -1,16 +1,20 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ticket/config.dart';
+import 'package:ticket/repository/customhelper.dart';
 
-class NavItem2 extends StatefulWidget {
-  const NavItem2({Key? key, String? password, String? username}) : super(key: key);
+class Nav01 extends StatefulWidget {
+  const Nav01({Key? key, required String fullName}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _AssignTicketListState createState() => _AssignTicketListState();
 }
 
-class _AssignTicketListState extends State<NavItem2> {
+class _AssignTicketListState extends State<Nav01> {
   List<dynamic> objects = [];
   List<dynamic> filteredObjects = [];
 
@@ -22,8 +26,20 @@ class _AssignTicketListState extends State<NavItem2> {
 
   Future<void> fetchAssignTickets() async {
     try {
-      final url = Uri.parse(Config.apiUrl + Config.loadAssignTicketAPI);
-      final response = await http.get(url);
+      String fullname = '';
+      await readJsonData(fullname).then((jsonData) {
+        String name = jsonData['fullname'];
+        fullname = name;
+      });
+
+      // ignore: avoid_print
+      print(fullname);
+
+      final url = Uri.parse(Config.apiUrl + Config.getAssignActiveTicketAPI);
+      final response = await http.post(
+        url,
+        body: {'fullname': fullname},
+      );
 
       debugPrint('$url');
 
@@ -65,7 +81,7 @@ class _AssignTicketListState extends State<NavItem2> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'History',
+                'Assigned Ticket(s)',
               ),
               SizedBox(width: 5),
               Tooltip(
@@ -81,20 +97,6 @@ class _AssignTicketListState extends State<NavItem2> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              onChanged: (value) {
-                filterObjects(value);
-              },
-              decoration: const InputDecoration(
-                labelText: 'Search',
-                hintText: 'Search for a store...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ),
           Expanded(
             child: ListView.builder(
               itemCount: filteredObjects.length,
@@ -140,41 +142,73 @@ class _AssignTicketListState extends State<NavItem2> {
                       left: 10,
                       right: 10,
                     ),
-                    child: Card(
-                      elevation: 4.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              ticketstatus,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: ticketstatus.toLowerCase() == 'new' ||
-                                        ticketstatus.toUpperCase() == 'pending'
-                                    ? const Color.fromARGB(255, 203, 7, 7)
-                                    : ticketstatus.toLowerCase() == 'open'
-                                        ? const Color.fromARGB(255, 68, 195, 72)
-                                        : Colors.orange,
+                    child: Center(
+                      child: Card(
+                        elevation: 4.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // CODE FOR COLOR CHANGING
+                                  Text(
+                                    ticketstatus,
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: ticketstatus.toLowerCase() ==
+                                                  'new' ||
+                                              ticketstatus.toUpperCase() ==
+                                                  'pending'
+                                          ? const Color.fromARGB(255, 203, 7, 7)
+                                          : ticketstatus.toLowerCase() == 'open'
+                                              ? Colors.blue
+                                              : Colors.orange,
+                                    ),
+                                  ),
+                                  // Text(
+                                  //   '$datecreated - $statusdetail',
+                                  //   textAlign: TextAlign.right,
+                                  //   style: const TextStyle(
+                                  //       fontStyle: FontStyle.italic,
+                                  //       fontWeight: FontWeight.bold,
+                                  //       fontSize: 9,
+                                  //       color:
+                                  //           Color.fromARGB(255, 192, 192, 192)),
+                                  // ),
+                                ],
                               ),
-                            ),
-                            Text(
-                              '$ticketid | $requestername',
-                              textAlign: TextAlign.left,
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                            Text(
-                              '$concern | $issue',
-                              textAlign: TextAlign.left,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontStyle: FontStyle.italic,
-                                fontWeight: FontWeight.bold,
+                              Text(
+                                '$ticketid | $requestername',
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(fontSize: 10),
                               ),
-                            ),
-                          ],
+                              Text(
+                                '$concern | $issue',
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '$datecreated - $statusdetail',
+                                textAlign: TextAlign.right,
+                                style: const TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 9,
+                                    color: Color.fromARGB(255, 192, 192, 192)),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -331,25 +365,37 @@ class DetailsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const Row(
-                children: [
-                  Text(
-                    'Findings:',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ],
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 6.0),
-                child: TextField(
-                  maxLines: null, // Allows for multiple lines of text
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    labelText: 'Enter your findings',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
+              // const Row(
+              //   children: [
+              //     Text(
+              //       'Findings:',
+              //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              //     ),
+              //   ],
+              // ),
+              // const Padding(
+              //   padding: EdgeInsets.only(top: 6.0),
+              //   child: TextField(
+              //     maxLines: null, // Allows for multiple lines of text
+              //     keyboardType: TextInputType.multiline,
+              //     decoration: InputDecoration(
+              //       labelText: 'Enter your text',
+              //       border: OutlineInputBorder(),
+              //     ),
+              //   ),
+              // ),
+              //  const Row(
+              //     crossAxisAlignment: CrossAxisAlignment.center,
+              //     children: [
+              //        Text(
+              //         'Selected Finding:',
+              //         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              //       ),
+              //        SizedBox(width: 10),
+
+              //     ],
+              //   ),
+
               // ElevatedButton(
               //   onPressed: () {
               //     showDialog(

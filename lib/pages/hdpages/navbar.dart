@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:ticket/pages/navitem1.dart';
+import 'package:ticket/pages/Nav01.dart';
+import 'package:ticket/pages/loginscreen.dart';
 import 'package:ticket/pages/navitem2.dart';
 import 'package:ticket/pages/navitem3.dart';
+import 'package:ticket/pages/navitem4.dart';
+
+import 'package:ticket/repository/customhelper.dart';
 
 void main() => runApp(const Homepage());
 
@@ -13,10 +17,30 @@ class Homepage extends StatefulWidget {
 }
 
 class HomepageState extends State<Homepage> {
-  final int _pageAmount = 3;
   final _pageController = PageController(initialPage: 0);
   int _selectedPage = 0;
-  String _currentAccount = 'Account 1';
+
+  String fullname = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFullname();
+  }
+
+  Future<void> fetchFullname() async {
+    try {
+      final jsonData = await readJsonData(fullname);
+      String name = jsonData['fullname'];
+      setState(() {
+        fullname = name;
+      });
+      print(fullname);
+    } catch (e) {
+      debugPrint('Error loading fullname: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,9 +51,12 @@ class HomepageState extends State<Homepage> {
           controller: _pageController,
           onPageChanged: (value) => setState(() => _selectedPage = value),
           children: const <Widget>[
-            NavItem1(),
+            Nav01(
+              fullName: '',
+            ),
             NavItem2(),
             NavItem3(),
+            NavItem4(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -38,7 +65,6 @@ class HomepageState extends State<Homepage> {
           selectedItemColor: Colors.blue[600],
           onTap: (value) {
             if (value == 2) {
-              // Show user profile as a bottom modal sheet
               showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
@@ -48,13 +74,14 @@ class HomepageState extends State<Homepage> {
                       child: Column(
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.list),
-                            title: const Text('Logs'),
+                            leading: const Icon(Icons.account_box_outlined),
+                            title: Text(fullname),
                             onTap: () {},
                           ),
+                          const Divider(),
                           ListTile(
-                            leading: const Icon(Icons.report),
-                            title: const Text('Report'),
+                            leading: const Icon(Icons.list),
+                            title: const Text('Logs'),
                             onTap: () {},
                           ),
                           ListTile(
@@ -63,49 +90,70 @@ class HomepageState extends State<Homepage> {
                             onTap: () {},
                           ),
                           ListTile(
-                            leading: const Icon(Icons.settings),
+                            leading: const Icon(
+                              Icons.report,
+                              color: Colors.red,
+                            ),
+                            title: const Text('Report'),
+                            onTap: () {},
+                          ),
+                          ListTile(
+                            leading: const Icon(
+                              Icons.settings,
+                              color: Colors.black,
+                            ),
                             title: const Text('Settings'),
                             onTap: () {},
                           ),
-                          Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: Colors.grey[400],
-                          ),
-                          ExpansionTile(
-                            leading: const Icon(Icons.account_circle),
-                            title: const Text('Account'),
-                            subtitle: Text(_currentAccount),
-                            children: <Widget>[
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: Colors.grey[400],
+                          ListTile(
+                            leading: const Icon(
+                              Icons.logout_outlined,
+                              color: Colors.black,
+                            ),
+                            title: const Text(
+                              'Logout',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                              SizedBox(
-                                height: 200.0,
-                                child: ListView.separated(
-                                  separatorBuilder:
-                                      (BuildContext context, int index) =>
-                                          const Divider(),
-                                  itemCount: 3,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return ListTile(
-                                      leading: const Icon(Icons.account_circle),
-                                      title: Text('Account ${index + 1}'),
-                                      onTap: () {
-                                        setState(() {
-                                          _currentAccount =
-                                              'Account ${index + 1}';
-                                        });
-                                        Navigator.pop(context);
+                            ),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: Text(
+                                    'Thank you $fullname',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  content: const Text(
+                                    'Please Come back again!',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(ctx).pop();
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (BuildContext context) =>
+                                                const LoginScreen(),
+                                          ),
+                                        );
                                       },
-                                    );
-                                  },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        color: Colors.green,
+                                        padding: const EdgeInsets.all(14),
+                                        child: const Text(
+                                          'Okay',
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -114,7 +162,6 @@ class HomepageState extends State<Homepage> {
                 },
               );
             } else {
-              // Navigate to the corresponding page
               _pageController.animateToPage(
                 value,
                 duration: const Duration(milliseconds: 300),

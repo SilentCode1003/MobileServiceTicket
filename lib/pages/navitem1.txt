@@ -40,7 +40,7 @@ class _AssignTicketListState extends State<NavItem1> {
   Future<void> fetchAssignTickets() async {
     try {
       final response = await http
-          .get(Uri.parse('http://192.168.20.161:3020/assignticket/load'));
+          .get(Uri.parse('http://172.16.1.200:3020/assignticket/load'));
 
       if (response.statusCode == 200) {
         setState(() {
@@ -85,20 +85,20 @@ class _AssignTicketListState extends State<NavItem1> {
                     Text(
                       '$ticketid $statusdetail',
                       textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 10),
+                      style: const TextStyle(fontSize: 10),
                     ),
                     // const SizedBox(height: 20),
                     Text(
-                      '$requestername',
+                      requestername,
                       textAlign: TextAlign.left,
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
 
                     Text(
-                      '$datecreated',
+                      datecreated,
                       textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12),
                     ),
                     const Text(
                       'Reffrence No. 10928319038',
@@ -110,7 +110,7 @@ class _AssignTicketListState extends State<NavItem1> {
                       padding: const EdgeInsets.only(top: 15.0),
                       child: Table(
                         children: [
-                          TableRow(
+                          const TableRow(
                             children: [
                               TableCell(
                                 child: Align(
@@ -142,19 +142,19 @@ class _AssignTicketListState extends State<NavItem1> {
                             children: [
                               TableCell(
                                 child: Padding(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Align(
                                     alignment: Alignment.topLeft,
-                                    child: Text('$requestername'),
+                                    child: Text(requestername),
                                   ),
                                 ),
                               ),
                               TableCell(
                                 child: Padding(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Align(
                                     alignment: Alignment.topLeft,
-                                    child: Text('$assignedto'),
+                                    child: Text(assignedto),
                                   ),
                                 ),
                               ),

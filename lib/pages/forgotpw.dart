@@ -83,9 +83,9 @@ class _ForgotPassword extends State<ForgotPassword> {
                                     'Alert',
                                     textAlign: TextAlign.center,
                                   ),
-                                  content: Column(
+                                  content: const Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: const [
+                                    children:  [
                                       Text(
                                           'We have sent an Email with instructions,'),
                                       Text('Please Check your Inbox'),
