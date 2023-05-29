@@ -1,0 +1,1077 @@
+==NAV1==
+
+import 'package:flutter/material.dart';
+
+class NavItem2 extends StatefulWidget {
+  const NavItem2({Key? key}) : super(key: key);
+
+  @override
+  NavItem2State createState() => NavItem2State();
+}
+
+class NavItem2State extends State<NavItem2> {
+  List<Map<String, dynamic>> stores = [
+    {
+      'name': 'Store A',
+      'number': '1234',
+      'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+    },
+    {
+      'name': 'Store B',
+      'number': '5678',
+      'description': 'Pellentesque habitant morbi tristique senectus et netus.'
+    },
+    {
+      'name': 'Store C',
+      'number': '9101',
+      'description': 'Mauris id enim id nulla dictum dapibus nec eu nulla.'
+    },
+    {
+      'name': 'Store D',
+      'number': '1121',
+      'description': 'Aliquam eget metus quis justo rhoncus mattis a eu ipsum.'
+    },
+    {
+      'name': 'Store E',
+      'number': '3141',
+      'description': 'Proin quis odio sed lacus imperdiet hendrerit id eu quam.'
+    },
+  ];
+
+  String filter = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredStores = stores.where((store) {
+      return store['name'].toLowerCase().contains(filter.toLowerCase()) ||
+          store['number'].toLowerCase().contains(filter.toLowerCase());
+    }).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Search Page'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  filter = value;
+                });
+              },
+              decoration: const InputDecoration(
+                labelText: 'Search',
+                hintText: 'Search for a store...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredStores.length,
+              itemBuilder: (context, index) {
+                final store = filteredStores[index];
+                return Card(
+                  child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StoreDetailsPage(store: store),
+                        ),
+                      );
+                    },
+                    title: Text(store['name']),
+                    subtitle: Text(store['number']),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StoreDetailsPage extends StatelessWidget {
+  final Map<String, dynamic> store;
+
+  const StoreDetailsPage({Key? key, required this.store}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(store['name']),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Store Number: ${store['number']}'),
+            const SizedBox(height: 16.0),
+            Text('Description: ${store['description']}'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+=====try===
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class NavItem1 extends StatefulWidget {
+  const NavItem1({super.key});
+
+  @override
+  _AssignTicketListState createState() => _AssignTicketListState();
+}
+
+class _AssignTicketListState extends State<NavItem1> {
+  final List<String> _cards = ['Card 1'];
+
+  final List<String> _dropdownItems = ['Done', 'Pending', 'Cancelled'];
+  String _selectedDropdownItem = 'Done';
+  final List<String> _dropdownItems2 = ['High', 'Medium', 'Low'];
+  String _selectedDropdownItem2 = 'High';
+
+  void _addCard() {
+    setState(() {
+      _cards.add('Card ${_cards.length + 1}');
+    });
+  }
+
+  void _deleteCard(int index) {
+    setState(() {
+      _cards.removeAt(index);
+    });
+  }
+
+  List<dynamic> objects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAssignTickets();
+  }
+
+  Future<void> fetchAssignTickets() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://192.168.30.18:3020/assignticket/load'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          objects = responseData['data'] as List<dynamic>;
+
+          print('Subject: $objects');
+        });
+      } else {
+        throw Exception('Failed to load assigned tickets');
+      }
+    } catch (e) {
+      print('Error loading assigned tickets: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Assigned Tickets'),
+      ),
+      body: ListView.builder(
+        itemCount: objects.length,
+        itemBuilder: (BuildContext context, int index) {
+          final ticket = objects[index];
+          String statusdetail = ticket['statusdetail'];
+          String ticketid = ticket['ticketid'];
+          String requestername = ticket['requestername'];
+          String datecreated = ticket['datecreated'];
+          String assignedto = ticket['assignedto'];
+          
+          return Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$ticketid $statusdetail',
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                    // const SizedBox(height: 20),
+                    Text(
+                      '$requestername',
+                      textAlign: TextAlign.left,
+                      style:
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+
+                    Text(
+                      '$datecreated',
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    const Text(
+                      'Reffrence No. 10928319038',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 10),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15.0),
+                      child: Table(
+                        children: [
+                          const TableRow(
+                            children: [
+                              TableCell(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'Requester',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'Agent Name',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                           TableRow(
+                            children: [
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('$requestername'),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('$assignedto'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          TableRow(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableCell(
+                                  child: DropdownButtonFormField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Status',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    value: _selectedDropdownItem,
+                                    items: _dropdownItems.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedDropdownItem = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableCell(
+                                  child: DropdownButtonFormField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Priority',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    value: _selectedDropdownItem2,
+                                    items: _dropdownItems2.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedDropdownItem2 = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _addCard,
+            tooltip: 'Add Card',
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(width: 16.0),
+          FloatingActionButton(
+            onPressed: () => _deleteCard(_cards.length - 1),
+            tooltip: 'Delete Card',
+            backgroundColor: Colors.red,
+            child: const Icon(Icons.delete),
+          ),
+        ],
+      ),
+    );
+  }
+}
+======5-10-23=====
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class NavItem2 extends StatefulWidget {
+  const NavItem2({super.key});
+
+  @override
+  _AssignTicketListState createState() => _AssignTicketListState();
+}
+
+class _AssignTicketListState extends State<NavItem2> {
+  final List<String> _cards = ['Card 1'];
+
+  final List<String> _dropdownItems = ['Done', 'Pending', 'Cancelled'];
+  String _selectedDropdownItem = 'Done';
+  final List<String> _dropdownItems2 = ['High', 'Medium', 'Low'];
+  String _selectedDropdownItem2 = 'High';
+
+  void _addCard() {
+    setState(() {
+      _cards.add('Card ${_cards.length + 1}');
+    });
+  }
+
+  void _deleteCard(int index) {
+    setState(() {
+      _cards.removeAt(index);
+    });
+  }
+
+  List<dynamic> objects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAssignTickets();
+  }
+
+  Future<void> fetchAssignTickets() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://172.16.1.200:3020/assignticket/load'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          objects = responseData['data'] as List<dynamic>;
+
+          print('Subject: $objects');
+        });
+      } else {
+        throw Exception('Failed to load assigned tickets');
+      }
+    } catch (e) {
+      print('Error loading assigned tickets: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Assigned Tickets'),
+      ),
+      body: ListView.builder(
+        itemCount: objects.length,
+        itemBuilder: (BuildContext context, int index) {
+          final ticket = objects[index];
+          String statusdetail = ticket['statusdetail'];
+          String ticketid = ticket['ticketid'];
+          String requestername = ticket['requestername'];
+          String datecreated = ticket['datecreated'];
+          String assignedto = ticket['assignedto'];
+          
+          return Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$ticketid $statusdetail',
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                    // const SizedBox(height: 20),
+                    Text(
+                      '$requestername',
+                      textAlign: TextAlign.left,
+                      style:
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+
+                    Text(
+                      '$datecreated',
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    const Text(
+                      'Reffrence No. 10928319038',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 10),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15.0),
+                      child: Table(
+                        children: [
+                          const TableRow(
+                            children: [
+                              TableCell(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'Requester',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'Agent Name',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                           TableRow(
+                            children: [
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('$requestername'),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('$assignedto'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          TableRow(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableCell(
+                                  child: DropdownButtonFormField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Status',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    value: _selectedDropdownItem,
+                                    items: _dropdownItems.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedDropdownItem = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableCell(
+                                  child: DropdownButtonFormField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Priority',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    value: _selectedDropdownItem2,
+                                    items: _dropdownItems2.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedDropdownItem2 = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _addCard,
+            tooltip: 'Add Card',
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(width: 16.0),
+          FloatingActionButton(
+            onPressed: () => _deleteCard(_cards.length - 1),
+            tooltip: 'Delete Card',
+            backgroundColor: Colors.red,
+            child: const Icon(Icons.delete),
+          ),
+        ],
+      ),
+    );
+  }
+}
+=========NAVITEM1===========
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class NavItem1 extends StatefulWidget {
+  const NavItem1({super.key});
+
+  @override
+  _AssignTicketListState createState() => _AssignTicketListState();
+}
+
+class _AssignTicketListState extends State<NavItem1> {
+  final List<String> _cards = ['Card 1'];
+
+  final List<String> _dropdownItems = ['Done', 'Pending', 'Cancelled'];
+  String _selectedDropdownItem = 'Done';
+  final List<String> _dropdownItems2 = ['High', 'Medium', 'Low'];
+  String _selectedDropdownItem2 = 'High';
+
+  void _addCard() {
+    setState(() {
+      _cards.add('Card ${_cards.length + 1}');
+    });
+  }
+
+  void _deleteCard(int index) {
+    setState(() {
+      _cards.removeAt(index);
+    });
+  }
+
+  List<dynamic> objects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAssignTickets();
+  }
+
+  Future<void> fetchAssignTickets() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://172.16.1.200:3020/assignticket/load'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          objects = responseData['data'] as List<dynamic>;
+
+          print('Subject: $objects');
+        });
+      } else {
+        throw Exception('Failed to load assigned tickets');
+      }
+    } catch (e) {
+      print('Error loading assigned tickets: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Assigned Tickets'),
+      ),
+      body: ListView.builder(
+        itemCount: objects.length,
+        itemBuilder: (BuildContext context, int index) {
+          final ticket = objects[index];
+          String statusdetail = ticket['statusdetail'];
+          String ticketid = ticket['ticketid'];
+          String requestername = ticket['requestername'];
+          String datecreated = ticket['datecreated'];
+          String assignedto = ticket['assignedto'];
+          
+          return Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$ticketid $statusdetail',
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                    // const SizedBox(height: 20),
+                    Text(
+                      '$requestername',
+                      textAlign: TextAlign.left,
+                      style:
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+
+                    Text(
+                      '$datecreated',
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    const Text(
+                      'Reffrence No. 10928319038',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 10),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15.0),
+                      child: Table(
+                        children: [
+                          const TableRow(
+                            children: [
+                              TableCell(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'Requester',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'Agent Name',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                           TableRow(
+                            children: [
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('$requestername'),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('$assignedto'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          TableRow(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableCell(
+                                  child: DropdownButtonFormField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Status',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    value: _selectedDropdownItem,
+                                    items: _dropdownItems.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedDropdownItem = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TableCell(
+                                  child: DropdownButtonFormField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Priority',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    value: _selectedDropdownItem2,
+                                    items: _dropdownItems2.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedDropdownItem2 = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _addCard,
+            tooltip: 'Add Card',
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(width: 16.0),
+          FloatingActionButton(
+            onPressed: () => _deleteCard(_cards.length - 1),
+            tooltip: 'Delete Card',
+            backgroundColor: Colors.red,
+            child: const Icon(Icons.delete),
+          ),
+        ],
+      ),
+    );
+  }
+}
+=======================================================================================
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class Nav01 extends StatefulWidget {
+  const Nav01({super.key});
+
+  @override
+  _AssignTicketListState createState() => _AssignTicketListState();
+}
+
+class _AssignTicketListState extends State<Nav01> {
+  List<dynamic> objects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAssignTickets();
+  }
+
+  Future<void> fetchAssignTickets() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://172.16.1.200:3020/assignticket/load'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          objects = responseData['data'] as List<dynamic>;
+
+          print('Subject: $objects');
+        });
+      } else {
+        throw Exception('Failed to load assigned tickets');
+      }
+    } catch (e) {
+      print('Error loading assigned tickets: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Card List Example'),
+      ),
+      body: ListView.builder(
+        itemCount: objects.length,
+        itemBuilder: (BuildContext context, int index) {
+          final ticket = objects[index];
+          String ticketid = ticket['ticketid'];
+          String concern = ticket['concern'];
+          return  Padding(
+            padding: const EdgeInsets.all(1.0),
+            child: Card(
+              child: Padding(
+                padding:const EdgeInsets.all(15.0),
+                child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(concern),
+                    Text(ticketid),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+========================================= SEARCH ===============
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:testapp/config.dart';
+
+class NavItem2 extends StatefulWidget {
+  const NavItem2({super.key});
+
+  @override
+  _AssignTicketListState createState() => _AssignTicketListState();
+}
+
+class _AssignTicketListState extends State<NavItem2> {
+  List<dynamic> objects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAssignTickets();
+  }
+
+  Future<void> fetchAssignTickets() async {
+    try {
+      final url = Uri.parse(Config.apiUrl + Config.loadAssignTicketAPI);
+      final response = await http.get(url);
+
+      debugPrint('$url');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          objects = responseData['data'] as List<dynamic>;
+
+          debugPrint('Subject: $objects');
+        });
+      } else {
+        throw Exception('Failed to load assigned tickets');
+      }
+    } catch (e) {
+      debugPrint('Error loading assigned tickets: $e');
+    }
+  }
+  List<dynamic> filteredObjects = [];
+
+@override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Search Demo',
+      home: Scaffold(
+        appBar: AppBar(
+          title:const Text('Search Demo'),
+        ),
+        body: Container(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: <Widget>[
+              TextField(
+                decoration: const InputDecoration(
+                  hintText: 'Search',
+                ),
+                onChanged: (String query) {
+                  // Filter objects based on search query
+                  filteredObjects = objects
+                      .where((object) => object.toLowerCase().contains(query.toLowerCase()))
+                      .toList();
+                  setState((){}); // Update the state to reflect the new filtered objects
+                },
+              ),
+              Expanded(
+                child: ListView.builder(
+            itemCount: objects.length,
+            itemBuilder: (BuildContext context, int index) {
+              final ticket = objects[index];
+              String ticketid = ticket['ticketid'];
+              String concern = ticket['concern'];
+              return Padding(
+                padding: const EdgeInsets.all(1.0),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(concern),
+                        Text(ticketid),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Card List Example'),
+//       ),
+//       body: Column(
+//         children: [
+//           ListView.builder(
+//             itemCount: objects.length,
+//             itemBuilder: (BuildContext context, int index) {
+//               final ticket = objects[index];
+//               String ticketid = ticket['ticketid'];
+//               String concern = ticket['concern'];
+//               return Padding(
+//                 padding: const EdgeInsets.all(1.0),
+//                 child: Card(
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(15.0),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       mainAxisAlignment: MainAxisAlignment.start,
+//                       children: [
+//                         Text(concern),
+//                         Text(ticketid),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               );
+//             },
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
